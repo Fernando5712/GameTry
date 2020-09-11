@@ -5,7 +5,7 @@
     <title>Game try</title>
     <style>
         * { padding: 0; margin: 0; }
-        canvas { background: #eee; display: block; margin: 0 auto; }
+        canvas { background: black; display: block; margin: 0 auto; }
     </style>
 </head>
 <body>
@@ -34,6 +34,7 @@
     var brickX = (c*(brickWidth+brickPadding))+brickOffsetLeft;
     var brickY = (r*(brickHeight+brickPadding))+brickOffsetTop;
     var score = 0;
+    var lives = 2;
 
 
     var bricks = [];
@@ -47,6 +48,18 @@
     document.addEventListener("keydown", keyDownHandler, false);
     document.addEventListener("keyup", keyUpHandler, false);
 
+    function drawLives() {
+        ctx.font = "16px Arial";
+        ctx.fillStyle = "#0095DD";
+        ctx.fillText("Lives: "+lives, canvas.width-65, 20);
+    }
+
+    function drawScore() {
+        ctx.font = "16px Arial";
+        ctx.fillStyle = "#0095DD";
+        ctx.fillText("Score: "+score, 8, 20);
+    }
+
     function collisionDetection() {
         for (var c = 0; c < brickColumnCount; c++) {
             for (var r = 0; r < brickRowCount; r++) {
@@ -57,7 +70,7 @@
                         b.status = 0;
                         score++;
                         if(score == brickRowCount*brickColumnCount) {
-                            alert("YOU WIN, CONGRATULATIONS!");
+                            alert("WOW! you did it!");
                             document.location.reload();
                             clearInterval(interval); // Needed for Chrome to end game
                         }
@@ -88,17 +101,15 @@
     function drawPaddle() {
         ctx.beginPath();
         ctx.rect(paddleX, canvas.height-paddleHeight, paddleWidth, paddleHeight);
-        ctx.fillStyle = "#0095DD";
+        ctx.fillStyle = "#FF0000";
         ctx.fill();
         ctx.closePath();
     }
 
     function drawBall() {
         ctx.beginPath();
-        // draws ball ..>
         ctx.arc(x, y, ballRadius, 0, Math.PI*2);
-        // <...
-        ctx.fillStyle = "#0095DD";
+        ctx.fillStyle = "#FFFFFF";
         ctx.fill();
         ctx.closePath();
     }
@@ -113,7 +124,7 @@
                     bricks[c][r].y = brickY;
                     ctx.beginPath();
                     ctx.rect(brickX, brickY, brickWidth, brickHeight);
-                    ctx.fillStyle = "#0095DD";
+                    ctx.fillStyle = "#FF0000";
                     ctx.fill();
                     ctx.closePath();
                 }
@@ -127,6 +138,7 @@
         drawBall();
         drawPaddle();
         drawScore();
+        drawLives();
         collisionDetection();
         if(x + dx > canvas.width-ballRadius || x + dx < ballRadius) {
             dx = -dx;
@@ -138,9 +150,19 @@
                 dy = -dy;
             }
             else {
-                alert("GAME OVER");
-                document.location.reload();
-                clearInterval(interval);
+                lives--;
+                if(!lives) {
+                    alert("You Have Died");
+                    document.location.reload();
+                    clearInterval(interval); // Needed for Chrome to end game
+                }
+                else {
+                    x = canvas.width/2;
+                    y = canvas.height-30;
+                    dx = 2;
+                    dy = -2;
+                    paddleX = (canvas.width-paddleWidth)/2;
+                }
             }
         }
         if(rightPressed && paddleX < canvas.width-paddleWidth) {

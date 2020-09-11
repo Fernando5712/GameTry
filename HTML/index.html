@@ -14,6 +14,12 @@
 
 <script>
 
+    function drawLives() {
+        ctx.font = "16px Arial";
+        ctx.fillStyle = "#0095DD";
+        ctx.fillText("Lives: "+lives, canvas.width-65, 20);
+    }
+
     function drawScore() {
         ctx.font = "16px Arial";
         ctx.fillStyle = "#0095DD";
@@ -119,6 +125,7 @@
         drawBall();
         drawPaddle();
         drawScore();
+        drawLives();
         collisionDetection();
         // implemented ball bounce
         if(x + dx > canvas.width-ballRadius || x + dx < ballRadius) {
@@ -132,9 +139,19 @@
                 dy = -dy;
             }
             else {
-                alert("GAME OVER");
-                document.location.reload();
-                clearInterval(interval);
+                lives--;
+                if(!lives) {
+                    alert("You Have Died.");
+                    document.location.reload();
+                    clearInterval(interval); // Needed for Chrome to end game
+                }
+                else {
+                    x = canvas.width/2;
+                    y = canvas.height-30;
+                    dx = 2;
+                    dy = -2;
+                    paddleX = (canvas.width-paddleWidth)/2;
+                }
             }
         }
         if(rightPressed && paddleX < canvas.width-paddleWidth) {
@@ -182,6 +199,8 @@
     var brickX = (c*(brickWidth+brickPadding))+brickOffsetLeft;
     var brickY = (r*(brickHeight+brickPadding))+brickOffsetTop;
     var score = 0;
+    var lives = 1;
+
 
 
     var bricks = [];
