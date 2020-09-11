@@ -16,13 +16,45 @@
     var canvas = document.getElementById("myCanvas");
     var ctx = canvas.getContext("2d");
 
-    function draw() {
-        // creates ball
+    function drawBall() {
         ctx.beginPath();
-        ctx.arc(x, y, 10, 0, Math.PI * 2);
+        // draws ball ..>
+        ctx.arc(x, y, ballRadius, 0, Math.PI*2);
+        // <...
         ctx.fillStyle = "#0095DD";
         ctx.fill();
         ctx.closePath();
+    }
+    // wall bounce if statements for top and bottom as well as sides of canvas
+    // if(y + dy > canvas.height || y + dy < 0) {
+    //     dy = -dy;
+    //
+    // if(x + dx > canvas.width || x + dx < 0) {
+    //     dx = -dx;
+    // }
+    //
+    // if(y + dy > canvas.height || y + dy < 0) {
+    //     dy = -dy;
+    // }
+
+    function draw() {
+        // clears canvas before ech frame
+        // ctx.clearRect(0, 0, canvas.width, canvas.height);
+        // creates ball
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        drawBall();
+        // implemented ball bounce
+        if(x + dx > canvas.width-ballRadius || x + dx < ballRadius) {
+            dx = -dx;
+        }
+        if(y + dy > canvas.height-ballRadius || y + dy < ballRadius) {
+            dy = -dy;
+        }
+        // ctx.beginPath();
+        // ctx.arc(x, y, 10, 0, Math.PI * 2);
+        // ctx.fillStyle = "#0095DD";
+        // ctx.fill();
+        // ctx.closePath();
         x += dx;
         y += dy;
     }
@@ -30,10 +62,17 @@
 
     // defines the x and y axis
         var x = canvas.width/2;
-    var y = canvas.height-30;
+        var y = canvas.height-30;
     // small changes to make movement
         var dx = 2;
-    var dy = -2;
+        var dy = -2;
+    // ball radius
+    var ballRadius = 10;
+    // creating paddle
+    var paddleHeight = 10;
+    var paddleWidth = 75;
+    var paddleX = (canvas.width-paddleWidth) / 2;
+
 
     // this creates squares
     <!--ctx.beginPath();-->
