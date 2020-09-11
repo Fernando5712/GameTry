@@ -13,8 +13,78 @@
 <canvas id="myCanvas" width="480" height="320"></canvas>
 
 <script>
-    var canvas = document.getElementById("myCanvas");
-    var ctx = canvas.getContext("2d");
+
+    function drawScore() {
+        ctx.font = "16px Arial";
+        ctx.fillStyle = "#0095DD";
+        ctx.fillText("Score: "+score, 8, 20);
+    }
+
+    function collisionDetection() {
+        for (var c = 0; c < brickColumnCount; c++) {
+            for (var r = 0; r < brickRowCount; r++) {
+                var b = bricks[c][r];
+                if (b.status == 1) {
+                    if (x > b.x && x < b.x + brickWidth && y > b.y && y < b.y + brickHeight) {
+                        dy = -dy;
+                        b.status = 0;
+                        // cretes a score counter & win notification
+                        score++;
+                        if(score == brickRowCount*brickColumnCount) {
+                            alert("YOU WIN, CONGRATULATIONS!");
+                            document.location.reload();
+                            clearInterval(interval); // Needed for Chrome to end game
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    function drawBricks() {
+        for (var c = 0; c < brickColumnCount; c++) {
+            for (var r = 0; r < brickRowCount; r++) {
+                if (bricks[c][r].status == 1) {
+                    var brickX = (c * (brickWidth + brickPadding)) + brickOffsetLeft;
+                    var brickY = (r * (brickHeight + brickPadding)) + brickOffsetTop;
+                    bricks[c][r].x = brickX;
+                    bricks[c][r].y = brickY;
+                    ctx.beginPath();
+                    ctx.rect(brickX, brickY, brickWidth, brickHeight);
+                    ctx.fillStyle = "#0095DD";
+                    ctx.fill();
+                    ctx.closePath();
+                }
+            }
+        }
+    }
+
+    function keyDownHandler(e) {
+        if(e.key == "Right" || e.key == "ArrowRight") {
+            rightPressed = true;
+        }
+        else if(e.key == "Left" || e.key == "ArrowLeft") {
+            leftPressed = true;
+        }
+    }
+
+    function keyUpHandler(e) {
+        if(e.key == "Right" || e.key == "ArrowRight") {
+            rightPressed = false;
+        }
+        else if(e.key == "Left" || e.key == "ArrowLeft") {
+            leftPressed = false;
+        }
+    }
+
+    function drawPaddle() {
+        ctx.beginPath();
+        ctx.rect(paddleX, canvas.height-paddleHeight, paddleWidth, paddleHeight);
+        ctx.fillStyle = "#0095DD";
+        ctx.fill();
+        ctx.closePath();
+    }
+
 
     function drawBall() {
         ctx.beginPath();
@@ -25,6 +95,8 @@
         ctx.fill();
         ctx.closePath();
     }
+
+
     // wall bounce if statements for top and bottom as well as sides of canvas
     // if(y + dy > canvas.height || y + dy < 0) {
     //     dy = -dy;
@@ -35,20 +107,41 @@
     //
     // if(y + dy > canvas.height || y + dy < 0) {
     //     dy = -dy;
-    // }
+
+
 
     function draw() {
         // clears canvas before ech frame
         // ctx.clearRect(0, 0, canvas.width, canvas.height);
         // creates ball
         ctx.clearRect(0, 0, canvas.width, canvas.height);
+        drawBricks();
         drawBall();
+        drawPaddle();
+        drawScore();
+        collisionDetection();
         // implemented ball bounce
         if(x + dx > canvas.width-ballRadius || x + dx < ballRadius) {
             dx = -dx;
         }
-        if(y + dy > canvas.height-ballRadius || y + dy < ballRadius) {
+        // paddle hit collision detection
+        if(y + dy < ballRadius) {
             dy = -dy;
+        } else if(y + dy > canvas.height-ballRadius) {
+            if(x > paddleX && x < paddleX + paddleWidth) {
+                dy = -dy;
+            }
+            else {
+                alert("GAME OVER");
+                document.location.reload();
+                clearInterval(interval);
+            }
+        }
+        if(rightPressed && paddleX < canvas.width-paddleWidth) {
+            paddleX += 7;
+        }
+        else if(leftPressed && paddleX > 0) {
+            paddleX -= 7;
         }
         // ctx.beginPath();
         // ctx.arc(x, y, 10, 0, Math.PI * 2);
@@ -57,25 +150,53 @@
         // ctx.closePath();
         x += dx;
         y += dy;
+        // callback function
     }
-    setInterval(draw, 10);
 
+
+    var canvas = document.getElementById("myCanvas");
+    var ctx = canvas.getContext("2d");
     // defines the x and y axis
-        var x = canvas.width/2;
-        var y = canvas.height-30;
+    var x = canvas.width/2;
+    var y = canvas.height-30;
     // small changes to make movement
-        var dx = 2;
-        var dy = -2;
+    var dx = 2;
+    var dy = -2;
     // ball radius
     var ballRadius = 10;
     // creating paddle
     var paddleHeight = 10;
     var paddleWidth = 75;
     var paddleX = (canvas.width-paddleWidth) / 2;
+    // paddle control throught button press
+    var rightPressed = false;
+    var leftPressed = false;
+    // creates bricks
+    var brickRowCount = 3;
+    var brickColumnCount = 5;
+    var brickWidth = 75;
+    var brickHeight = 20;
+    var brickPadding = 10;
+    var brickOffsetTop = 30;
+    var brickOffsetLeft = 30;
+    var brickX = (c*(brickWidth+brickPadding))+brickOffsetLeft;
+    var brickY = (r*(brickHeight+brickPadding))+brickOffsetTop;
+    var score = 0;
+
+
+    var bricks = [];
+    for (var c = 0; c < brickColumnCount; c++) {
+        bricks[c] = [];
+        for (var r = 0; r < brickRowCount; r++) {
+            bricks[c][r] = { x: 0, y: 0, status: 1 };
+        }
+    }
+
+    document.addEventListener("keydown", keyDownHandler, false);
+    document.addEventListener("keyup", keyUpHandler, false);
 
 
     // this creates squares
-    <!--ctx.beginPath();-->
     <!--ctx.rect(20, 40, 50, 50);-->
     <!--ctx.fillStyle = "#FF0000";-->
     <!--ctx.fill();-->
@@ -92,6 +213,11 @@
     <!--ctx.strokeStyle = "rgba(0, 0, 255, 0.5)";-->
     <!--ctx.stroke();-->
     // ctx.closePath();
+    <!--ctx.beginPath();-->
+
+
+    // setInterval(draw, 10);
+    var interval = setInterval(draw, 10);
 </script>-->
 
 </body>
